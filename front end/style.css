@@ -1,0 +1,73 @@
+body {
+    font-family: Arial, Helvetica, sans-serif, sans-serif;
+    background-image: url('/Users/test/Desktop/"My project"/front end/01ab83c84f92ab5f3b9f2b92851d475b.jpg');
+    background-size: cover; 
+    background-position: center;
+    background-repeat: no-repeat;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  
+  .login-container {
+    background-image: url('/Users/test/Desktop/"My project"/front end/67dc8587ccf0a98437b0f89510c3f141.jpg');
+    background-size: cover; 
+    background-position: center;
+    background-repeat: no-repeat;
+    padding: 20px 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+  }
+  
+  h1 {
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+    text-align: left;
+  }
+  
+  label {
+    font-size: 14px;
+    margin-bottom: 5px;
+    display: block;
+    color: #ffffff;
+  }
+  
+  input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ffffff;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  
+  button {
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #0056b3;
+  }
+  
+  .error-message {
+    margin-top: 15px;
+    color: red;
+    font-size: 14px;
+    display: none;
+  }
+  

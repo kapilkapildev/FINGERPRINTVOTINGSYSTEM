@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retrieve User Data</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background: #fff;
+            padding: 20px 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 100px;
+        }
+        .left {
+            flex: 10;
+        }
+        .right {
+            background-color: #f1f1f1;
+            border-radius: 8px;
+            padding: 20px;
+            display: ruby-base-container;
+            flex-direction:row;
+            align-items: center;
+            justify-content: right
+        }
+        h1 {
+            font-size: 1.8em;
+            color: #007BFF;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+        input.verified {
+            border: 2px solid #28a745;
+            background-color: #eaffea;
+            margin-bottom: 25px; /* Add 10px extra margin when verified */
+        }
+        .fingerprint {
+            text-align: center;
+        }
+        .fingerprint img {
+            width: 80px;
+            height: 80px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        .fingerprint p {
+            font-size: 0.9em;
+            color: #555;
+        }
+        #result {
+            margin-top: 20px;
+        }
+        #result h2 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            color: #28a745;
+        }
+        #result p {
+            font-size: 1em;
+            line-height: 1.6;
+            margin: 5px 0;
+        }
+        #result p strong {
+            color: #333;
+        }
+        #result p.error {
+            color: #e74c3c;
+        }
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            .right {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Column: Voter ID Input and Results -->
+        <div class="left">
+            <h1>Search User by Voter ID</h1>
+            <label for="voter-id">Enter Voter ID:</label>
+            <input type="text" id="voter-id" placeholder="e.g., 123456" required>
+            <div id="result"></div>
+        </div>
+
+        <!-- Right Column: Fingerprint Verification -->
+        <div class="right">
+            <h1>Fingerprint Verification</h1>
+            <div class="fingerprint">
+                <img src="https://img.icons8.com/ios-filled/100/fingerprint.png" alt="Fingerprint" id="fingerprint-icon">
+                <p>Scan your fingerprint to verify identity</p>
+            </div>
+            <div id="fingerprint-result"></div>
+        </div>
+    </div>
+
+       
+    <script>
+        const voterIdInput = document.getElementById('voter-id');
+        const resultDiv = document.getElementById('result');
+        const fingerprintIcon = document.getElementById('fingerprint-icon');
+        const fingerprintResultDiv = document.getElementById('fingerprint-result');
+    
+        // Function to fetch user details based on Voter ID
+        async function fetchUserDetails(VoterID) {
+            try {
+                resultDiv.innerHTML = `<p>Fetching user details...</p>`;
+                const response = await fetch(`http://localhost:3000/get-Voters/${VoterID}`);
+                if (!response.ok) throw new Error('User not found');
+    
+                const userData = await response.json();
+                resultDiv.innerHTML = `
+                    <h2>User Details</h2>
+                    <p><strong>Name:</strong> ${userData.FullName}</p>
+                    <p><strong>Age:</strong> ${userData.Age}</p>
+                    <p><strong>Address:</strong> ${userData.Address}</p>
+                    <p><strong>Constituency:</strong> ${userData.Constituency}</p>
+                `;
+                voterIdInput.classList.add('verified');
+    
+                // Redirect to the second page with the constituency
+                setTimeout(() => {
+                    window.location.href = `Candidates.html?constituency=${encodeURIComponent(userData.Constituency)}`;
+                }, 3000); // 3-second delay for readability
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">${error.message}</p>`;
+                voterIdInput.classList.remove('verified');
+            }
+        }
+    
+        // Automatically fetch data when voter ID is entered
+        voterIdInput.addEventListener('input', () => {
+            const voterId = voterIdInput.value.trim();
+            if (voterId.length >= 2) {
+                fetchUserDetails(voterId);
+            } else {
+                resultDiv.innerHTML = ''; // Clear results for invalid input
+                voterIdInput.classList.remove('verified');
+            }
+        });
+    
+        // Simulate fingerprint verification
+        fingerprintIcon.addEventListener('click', () => {
+            fingerprintResultDiv.innerHTML = `<p style="color: green;">Fingerprint verified successfully!</p>`;
+        });
+    </script>
+    
+
+</body>
+</html>
+
+
+

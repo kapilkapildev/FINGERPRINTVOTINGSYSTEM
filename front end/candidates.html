@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voting System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+        header {
+            background-color: #6200ea;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            margin: 20px auto;
+            max-width: 800px;
+            padding: 20px;
+            background: white;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table th, table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        table th {
+            background-color: #f4f4f9;
+        }
+        button {
+            background-color: #6200ea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #4b00b3;
+        }
+        .voted-button {
+            background-color: green !important;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Voting System</h1>
+    </header>
+    <div class="container">
+        <h2>Candidate Details</h2>
+        <table id="candidatesTable">
+            <thead>
+                <tr>
+                    <th>Candidate Name</th>
+                    <th>Party</th>
+                    <th>Constituency</th>
+                    <th>Symbol</th>
+                    <th>Vote</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+<script>
+const API_BASE_URL = "http://localhost:1000";
+// const VOTING_SERVER_URL = "http://localhost:2000";
+
+// Function to extract query parameters from the URL
+function getQueryParameter(name) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(name);
+}
+// Function to fetch candidates from the backend
+async function fetchCandidates(constituency) {
+    try {
+        // Fetch filtered candidates from the backend
+        const response = await fetch(`${API_BASE_URL}/get-Candidates?constituency=${encodeURIComponent(constituency)}`);
+        if (!response.ok) throw new Error('No candidates found for this constituency');
+
+        // Parse the JSON response
+        const Candidates = await response.json();
+
+        // Clear the table body
+        const tableBody = document.querySelector("#candidatesTable tbody");
+        tableBody.innerHTML = ""; // Clear previous rows
+
+        // Loop through the candidates and populate the table
+        Candidates.forEach(Candidates => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${Candidates.candidate_name}</td>
+                <td>${Candidates.party_name}</td>
+                <td>${Candidates.constituency}</td>
+                <td><img src="${Candidates.symbol}" alt="Candidate Symbol" width="50"></td>
+                <td>
+                    <button onclick="castVote(${Candidates.id})">Vote</button>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+    } catch (error) {
+        console.error("Error fetching candidates:", error);
+        alert("Failed to load candidate details.");
+    }
+}
+
+// Function to cast vote
+async function castVote(candidateId) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/get-voter-session`, { credentials: "include" });
+        if (!response.ok) throw new Error('Not logged in');
+
+        const { voter_id } = await response.json();
+        if (!voter_id) {
+            alert("You must be logged in.");
+            return;
+        }
+
+        if (confirm("Are you sure you want to vote for this candidate?")) {
+            const voteResponse = await fetch(`${VOTING_SERVER_URL}/cast-vote`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ candidate_id: candidateId, voter_id })
+            });
+
+            if (!voteResponse.ok) throw new Error('Vote failed');
+
+            const result = await voteResponse.json();
+            alert(result.message || "Vote successfully cast!");
+
+            document.getElementById(`vote-btn-${candidateId}`).textContent = "Voted";
+            document.getElementById(`vote-btn-${candidateId}`).classList.add("voted-button");
+            document.getElementById(`vote-btn-${candidateId}`).disabled = true;
+        }
+    } catch (error) {
+        console.error("Error casting vote:", error);
+        alert("Failed to cast vote.");
+    }
+}
+
+
+</script>
+</body>
+</html>
